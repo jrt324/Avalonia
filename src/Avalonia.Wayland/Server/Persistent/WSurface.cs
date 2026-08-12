@@ -584,6 +584,14 @@ class WXdgTopLevel : WXdgShellSurface, IWXdgTopLevel
             _decoration.SetMode(ZxdgToplevelDecorationV1.ModeEnum.ServerSide);
         }
 
+        // Identify the application to the compositor. Sent unconditionally (and on every
+        // connect, so it survives a reconnect) because the shell reads it once, when the
+        // toplevel appears: mutter mirrors app_id into MetaWindow's wm_class, which is how
+        // gnome-shell matches a window back to its .desktop file. Without it the window stays
+        // unassociated — generic icon in the switcher, no taskbar grouping, and portal
+        // permission dialogs that compare the caller against the focused app are refused.
+        _xdgTopLevel.SetAppId(Globals.AppId);
+
         // Re-apply cached title on reconnect.
         if (_title != null)
             _xdgTopLevel.SetTitle(_title);

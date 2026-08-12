@@ -36,6 +36,20 @@ public class WaylandPlatformOptions
     public bool? EnableReconnects { get; set; }
 
     /// <summary>
+    /// The application identifier sent as <c>xdg_toplevel.set_app_id</c>. It should match the
+    /// basename of the application's desktop entry (e.g. <c>org.example.Foo</c> for
+    /// <c>org.example.Foo.desktop</c>), which is what the spec asks for and what desktop shells
+    /// rely on to tie a window back to its installed application: icon and title in the window
+    /// switcher, grouping in taskbars, and — on GNOME — the "is the calling app the focused one?"
+    /// check that guards portal permission dialogs.
+    ///
+    /// When <c>null</c>, the <c>RESOURCE_NAME</c> environment variable is used, falling back to
+    /// the process name. This mirrors <c>X11PlatformOptions.WmClass</c>, whose value ends up in
+    /// the same place: compositors map <c>app_id</c> onto the window's WM_CLASS equivalent.
+    /// </summary>
+    public string? AppId { get; set; }
+
+    /// <summary>
     /// Suppresses server-side decoration negotiation
     /// (<c>zxdg_decoration_manager_v1</c>): toplevels behave as if the
     /// compositor never advertised SSD support. Used primarily for

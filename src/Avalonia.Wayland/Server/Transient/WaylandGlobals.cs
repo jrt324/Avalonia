@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Avalonia.Platform;
 using Avalonia.Wayland.Screens;
 using Avalonia.Wayland.Server.Interop;
@@ -49,6 +50,13 @@ class WaylandGlobals
     /// every toplevel (no SSD negotiation will be attempted).
     /// </summary>
     public ZxdgDecorationManagerV1? XdgDecorationManager { get; }
+
+    /// <summary>
+    /// The resolved <see cref="WaylandPlatformOptions.AppId"/>, sent on every toplevel.
+    /// Resolved once per connection rather than per toplevel: it is a per-application
+    /// constant, and the fallback reads the environment and the process name.
+    /// </summary>
+    public string AppId { get; }
 
     public bool HasFractionalScaling => FractionalScaleManager != null && Viewporter != null;
 
@@ -130,6 +138,11 @@ class WaylandGlobals
     {
         Connection = connection;
         Worker = worker;
+        // Same fallback chain as X11's WM_CLASS, so both backends identify an
+        // application the same way when the embedder sets no explicit id.
+        AppId = platformOptions.AppId
+                ?? Environment.GetEnvironmentVariable("RESOURCE_NAME")
+                ?? Process.GetCurrentProcess().ProcessName;
         InputDispatcher = new WaylandInputDispatcher(this);
         Outputs = new WaylandOutputsTracker(outputsSink);
         Registry = connection.Display.GetRegistry(new RegistryListener(this), connection.Queue);
